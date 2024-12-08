@@ -1,9 +1,15 @@
 package backend.academy.app;
 
 import backend.academy.transformation.BentTransformation;
+import backend.academy.transformation.ExTransformation;
+import backend.academy.transformation.ExponentialTransformation;
+import backend.academy.transformation.EyefishTrasformation;
 import backend.academy.transformation.HandkerchiefTransformation;
+import backend.academy.transformation.PolarTransformation;
 import backend.academy.transformation.PowerTransformation;
 import backend.academy.transformation.SphericalTransformation;
+import backend.academy.transformation.SpiralTransformation;
+import backend.academy.transformation.SwirlTransformation;
 import backend.academy.transformation.Transformation;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +35,7 @@ public class UserInputHandler {
     public static List<String> getTransformations(Scanner scanner) {
         String input = scanner.nextLine();
         if (input.isEmpty()) {
-            return List.of("spherical", "handkerchief", "bent", "power"); // Значения по умолчанию
+            return List.of("swirl", "spherical", "handkerchief", "bent", "power", "eyefish", "exponential", "ex", "polar", "spiral"); // Значения по умолчанию
         }
         String[] transformations = input.split(",");
         List<String> result = new ArrayList<>();
@@ -47,6 +53,12 @@ public class UserInputHandler {
                 case "handkerchief" -> transformations.add(new HandkerchiefTransformation());
                 case "bent" -> transformations.add(new BentTransformation());
                 case "power" -> transformations.add(new PowerTransformation());
+                case "swirl" -> transformations.add(new SwirlTransformation());
+                case "eyefish" -> transformations.add(new EyefishTrasformation());
+                case "exponential" -> transformations.add(new ExponentialTransformation());
+                case "ex" -> transformations.add(new ExTransformation());
+                case "polar" -> transformations.add(new PolarTransformation());
+                case "spiral" -> transformations.add(new SpiralTransformation());
                 default -> throw new IllegalArgumentException("Неизвестная трансформация: " + name);
             }
         }

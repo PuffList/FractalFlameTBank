@@ -1,61 +1,80 @@
 package backend.academy.app;
 
 import backend.academy.domain.Config;
+import backend.academy.engine.MultiThreadedFlameGenerator;
 import backend.academy.engine.SingleThreadedFlameGenerator;
 import backend.academy.render.Renderer;
 import backend.academy.transformation.Transformation;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Scanner;
 
 public class App {
 
+    private static final PrintStream OUT = System.out;
+    private static final Scanner SCANNER = new Scanner(System.in);
+    private static final PrintStream ERR = System.err;
+
     public void run() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("=== Генерация фрактального пламени ===");
+        try (SCANNER) {
+            OUT.println("=== Генерация фрактального пламени ===");
 
-            // Ввод параметров пользователем
-            System.out.print("Введите ширину изображения (по умолчанию 1920): ");
-            int width = UserInputHandler.getInt(scanner, 1920);
+            OUT.print("Введите ширину изображения (по умолчанию 1920): ");
+            int width = UserInputHandler.getInt(SCANNER, 1920);
 
-            System.out.print("Введите высоту изображения (по умолчанию 1080): ");
-            int height = UserInputHandler.getInt(scanner, 1080);
+            OUT.print("Введите высоту изображения (по умолчанию 1080): ");
+            int height = UserInputHandler.getInt(SCANNER, 1080);
 
-            System.out.print("Введите количество итераций (по умолчанию 10 000 000): ");
-            int iterations = UserInputHandler.getInt(scanner, 10_000_000);
+            OUT.print("Введите количество итераций (по умолчанию 50 0000): ");
+            int iterations = UserInputHandler.getInt(SCANNER, 500000);
 
-            System.out.print("Запускать в многопоточном режиме? (true/false, по умолчанию false): ");
-            boolean multithreaded = UserInputHandler.getBoolean(scanner, false);
+            OUT.print("Введите количество начальных точек (по умолчанию 5): ");
+            int samplesCount = UserInputHandler.getInt(SCANNER, 5);
 
-            System.out.print("Введите количество потоков (если многопоточный режим, по умолчанию 4): ");
-            int threads = multithreaded ? UserInputHandler.getInt(scanner, 4) : 1;
+            OUT.print("Введите количество аффинных преобразований (по умолчанию 5): ");
+            int affineTransformationsCount = UserInputHandler.getInt(SCANNER, 5);
 
-            System.out.print("Введите имя выходного файла (по умолчанию flame.png): ");
-            String outputFile = UserInputHandler.getString(scanner, "src/main/resources/flame.png");
+            OUT.print("Запускать в многопоточном режиме? (true/false, по умолчанию false): ");
+            boolean multithreaded = UserInputHandler.getBoolean(SCANNER, false);
 
-            System.out.println("Выберите трансформации (Linear, Sinusoidal, Spherical, Swirl, ): ");
-            List<String> transformationNames = UserInputHandler.getTransformations(scanner);
+            OUT.print("Введите имя выходного файла (по умолчанию flame.png): ");
+            String outputFile = UserInputHandler.getString(SCANNER, "src/main/resources/flame.png");
 
-            // Создание конфигурации
+            OUT.println("Выберите трансформации (Spherical, Handkerchief, Bent, Power," +
+                " Eyefish, Exponential, Ex, Polar, Spiral, Swirl): ");
+            List<String> transformationNames = UserInputHandler.getTransformations(SCANNER);
+
+            OUT.print("Введите количество осей симметрии (по умолчанию 1): ");
+            int axesCount = UserInputHandler.getInt(SCANNER, 1);
+
             Config config =
-                new Config(width, height, iterations, transformationNames, multithreaded, threads, outputFile);
+                new Config(width, height, iterations,
+                    samplesCount, affineTransformationsCount,
+                    transformationNames, multithreaded, outputFile, axesCount);
 
-            // Рендеринг
-            Renderer renderer = new Renderer(config.width(), config.height(), config.outputFile());
+            Renderer renderer = new Renderer(config.width(), config.height(), config.axesCount(), config.outputFile());
 
             List<Transformation> transformations = UserInputHandler.createTransformations(transformationNames);
 
+            long startTime = System.currentTimeMillis();
+
             if (config.multithreaded()) {
-                // Многопоточная версия
-                System.out.println("Многопоточная версия пока не реализована.");
+                MultiThreadedFlameGenerator generator =
+                    new MultiThreadedFlameGenerator(config, transformations, renderer);
+                generator.generateFlame();
             } else {
                 SingleThreadedFlameGenerator generator =
                     new SingleThreadedFlameGenerator(config, transformations, renderer);
-                generator.generate();
+                generator.generateFlame();
             }
 
-            System.out.println("Фрактал успешно сгенерирован и сохранён в " + outputFile);
+            long endTime = System.currentTimeMillis();
+            OUT.println("Время выполнения: " + (endTime - startTime) + " мс");
+
+
+            OUT.println("Фрактал успешно сгенерирован и сохранён в " + outputFile);
         } catch (Exception e) {
-            System.err.println("Ошибка: " + e.getMessage());
+            ERR.println("Ошибка: " + e.getMessage());
         }
     }
 }
