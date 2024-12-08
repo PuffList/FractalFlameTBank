@@ -18,7 +18,7 @@ public class MultiThreadedFlameGenerator extends BaseFlameGenerator {
     private static final PrintStream OUT = System.out;
     private static final PrintStream ERR = System.err;
     private static final int TIME_RESTRICTION = 100;
-    private final int threads_count = 4;
+    private final int threadsCount = 4;
 
     /**
      * Конструктор для многопоточной генерации пламени.
@@ -39,7 +39,7 @@ public class MultiThreadedFlameGenerator extends BaseFlameGenerator {
     @Override
     public void generateFlame() throws InterruptedException {
         OUT.println("Запуск многопоточной генерации...");
-        ExecutorService executorService = Executors.newFixedThreadPool(threads_count);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadsCount);
 
         for (int i = 0; i < config.samplesCount(); i++) {
             executorService.execute(this::generateFlameSample);

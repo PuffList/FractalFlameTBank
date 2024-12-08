@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class ChaosGame {
 
-    private final int COLOR_RESTRICTED = 255;
+    private final static int COLOR_RESTRICTED = 255;
     private final List<AffineTransformation> affineTransformations;
     private final List<Transformation> transformations;
 
