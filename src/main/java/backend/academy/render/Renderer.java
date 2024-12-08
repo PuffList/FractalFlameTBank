@@ -11,36 +11,61 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
 
+/**
+ * Класс для рендеринга изображения, представляющего пламя.
+ * Отвечает за отрисовку точек, коррекцию гаммы и сохранение изображения в файл.
+ */
 public class Renderer {
 
     private static final PrintStream ERR = System.err;
+    private static final double GAMMA_CF = 1.5;
+    private static final double DEGREE = 360.0;
     private final BufferedImage image;
     private final PixelImage pixelImage;
     private final int axesCount;
 
+    /**
+     * Конструктор для инициализации рендерера.
+     * Создает изображение заданного размера и инициализирует необходимые параметры.
+     *
+     * @param width ширина изображения
+     * @param height высота изображения
+     * @param axesCount количество осей симметрии
+     * @param outputFile файл для сохранения изображения
+     */
     public Renderer(int width, int height, int axesCount, String outputFile) {
         this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         this.pixelImage = new PixelImage(width, height);
         this.axesCount = axesCount;
     }
 
+    /**
+     * Отрисовывает точку на изображении с учетом симметрии и заданного цвета.
+     *
+     * @param point точка, которую нужно отрисовать
+     * @param color цвет точки
+     */
     public void renderPoint(Point point, Color color) {
         List<Point> points = getSymmetryPoints(point);
         points.add(point);
         points.forEach(p -> setPixel(p.x(), p.y(), color));
     }
 
+    /**
+     * Применяет коррекцию гаммы к изображению.
+     */
     public void gammaCorrection() {
         double maxNormal = 0.0;
-        double gamma = 1.5;
+        double gamma = GAMMA_CF;
 
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 Pixel pixel = pixelImage.getPixel(x, y);
                 if (pixel.pointsCount() != 0) {
                     pixel.normal(Math.log10(pixel.pointsCount()));
-                    if (pixel.normal() > maxNormal)
+                    if (pixel.normal() > maxNormal) {
                         maxNormal = pixel.normal();
+                    }
                 }
             }
         }
@@ -57,6 +82,9 @@ public class Renderer {
         }
     }
 
+    /**
+     * Отображает изображение, перенося каждый пиксель в объект BufferedImage.
+     */
     public void renderImage() {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
@@ -66,6 +94,11 @@ public class Renderer {
         }
     }
 
+    /**
+     * Сохраняет изображение в файл.
+     *
+     * @param outputFile путь к файлу, в который будет сохранено изображение
+     */
     public void saveImage(String outputFile) {
         try {
             ImageIO.write(image, "png", new File(outputFile));
@@ -88,7 +121,7 @@ public class Renderer {
 
     private List<Point> getSymmetryPoints(Point point) {
         List<Point> points = new ArrayList<>();
-        double angleStep = 360.0 / axesCount;
+        double angleStep = DEGREE / axesCount;
 
         for (int i = 0; i < axesCount; i++) {
             double angle = Math.toRadians(i * angleStep);

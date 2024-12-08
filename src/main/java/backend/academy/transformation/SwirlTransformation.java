@@ -3,6 +3,7 @@ package backend.academy.transformation;
 import backend.academy.domain.Point;
 
 public class SwirlTransformation implements Transformation {
+
     @Override
     public Point transform(Point p) {
         double r2 = p.x() * p.x() + p.y() * p.y();

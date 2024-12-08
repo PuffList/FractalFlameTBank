@@ -2,7 +2,7 @@ package backend.academy.transformation;
 
 import backend.academy.domain.Point;
 
-public class SphericalTransformation implements Transformation{
+public class SphericalTransformation implements Transformation {
 
     @Override
     public Point transform(Point p) {
